@@ -26,4 +26,4 @@ Makefile*
 # QtCreator
 
 *.autosave
-build/*
+build
