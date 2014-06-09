@@ -1,4 +1,6 @@
+plasmoid.setPreferredSize(24, 800)
 label = new Label();
+label.wordWrap = false;
 
 function recv(job, data)
 {
