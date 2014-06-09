@@ -1,21 +1,23 @@
 [Desktop Entry]
-Encoding=UTF-8
-Name=Plasmobar
 Comment=XMobar like Plasmoid
+Encoding=UTF-8
+Icon=
+Keywords=
+Name=Plasmobar
 Type=Service
 X-KDE-ParentApp=
 X-KDE-PluginInfo-Author=Martin
-X-KDE-PluginInfo-Email=martin@martinyrjola.net
-X-KDE-PluginInfo-Name=net.martinyrjola.plasmobar
-X-Plasma-API=declarativeappletscript
-X-Plasma-MainScript=ui/main.qml
-X-Plasma-DefaultSize=200,100
-
-X-KDE-PluginInfo-Website=http://plasma.kde.org/
 X-KDE-PluginInfo-Category=Examples
-X-KDE-PluginInfo-Version=0.0
-
 X-KDE-PluginInfo-Depends=
-X-KDE-PluginInfo-License=GPL
+X-KDE-PluginInfo-Email=martin@martinyrjola.net
 X-KDE-PluginInfo-EnabledByDefault=true
+X-KDE-PluginInfo-License=MIT
+X-KDE-PluginInfo-Name=net.martinyrjola.plasmobar
+X-KDE-PluginInfo-Version=0.1
+X-KDE-PluginInfo-Website=http://plasma.kde.org/
 X-KDE-ServiceTypes=Plasma/Applet
+X-Plasma-API=javascript
+X-Plasma-DefaultSize=200,100
+X-Plasma-MainScript=ui/fiforeader.js
+X-Plasma-RemoteLocation=
+X-Plasma-RequiredExtensions=LocalIO,http
