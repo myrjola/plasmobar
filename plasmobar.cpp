@@ -86,6 +86,7 @@ void Plasmobar::init()
    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
 
   m_label = new Plasma::Label(this);
+  m_label->setWordWrap(false);
 
   layout->addItem(m_label);
 
