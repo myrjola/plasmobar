@@ -13,7 +13,7 @@ function recv(job, data)
 
 function fini(job)
 {
-    timer.start(333)
+    timer.start(100)
 }
 
 function refresh() {
