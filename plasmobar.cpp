@@ -1,4 +1,5 @@
 #include "plasmobar.h"
+
 #include <QCoreApplication>
 #include <QPainter>
 #include <QFontMetrics>
@@ -7,6 +8,7 @@
 #include <QTimer>
 #include <QThread>
 #include <QDebug>
+#include <QStringBuilder>
 
 
 #include <plasma/svg.h>
@@ -27,7 +29,8 @@
 using namespace std;
 
 Plasmobar::Plasmobar(QObject *parent, const QVariantList &args)
-    : Plasma::Applet(parent, args)
+    : Plasma::Applet(parent, args),
+      m_label(new Plasma::Label(this))
 {
     resize(500, 30);
 }
@@ -48,34 +51,24 @@ class FIFOReader : public QObject
 public slots:
     void mainLoop()
     {
-        qDebug()<<"Worker::mainLoop get called from?: "<<QThread::currentThreadId();
-        int m_pipe_fd = open("/tmp/xmonadfifo", O_RDONLY | O_NONBLOCK);
-        int ret;
-        fd_set fdset;
-        char buff[1000];
-        int len = 1000;
-        if (m_pipe_fd != -1) {
-            while (true) {
-                FD_ZERO(&fdset);
-                FD_SET(m_pipe_fd,&fdset);
-                struct timeval tv;
-                tv.tv_sec = 1;
-                tv.tv_usec = 0;
-                ret = select(m_pipe_fd+1,&fdset,NULL,NULL,&tv);
-                if (ret > 0) {
-                    read(m_pipe_fd, buff, len);
-                    emit requestLabelUpdate(QString(buff));
-                }
-                else if ( ret == 0 ) {
-                }
-                else {
-                    qDebug() << "Error returned from select: " << ret << endl;
-                    break;
+        qDebug() << "FIFOReader::mainLoop starting";
+        FILE *fp;
+        int c;
+        QString line = "";
+        qDebug() << "FIFOReader::mainLoop opening file";
+        fp=fopen("/tmp/xmonadfifo", "r");
+        if (fp != NULL) {
+            while((c=getc(fp)) != EOF)
+            {
+                line = line % QChar((char) c);
+                if (((char) c) == '\n') {
+                    emit requestLabelUpdate(line);
+                    line = "";
                 }
             }
         }
-        qDebug() << "FIFOReader thread exiting..." << ret << endl;
-        ::close(m_pipe_fd);
+        fclose(fp);
+        qDebug() << "FIFOReader::mainLoop thread exiting...";
     }
 signals:
     void requestLabelUpdate(const QString &);
@@ -83,25 +76,24 @@ signals:
 
 void Plasmobar::init()
 {
-   QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
 
-  m_label = new Plasma::Label(this);
-  m_label->setWordWrap(false);
+    m_label->setWordWrap(false);
 
-  layout->addItem(m_label);
+    layout->addItem(m_label);
 
-  FIFOReader *worker = new FIFOReader();
-  QThread* thread = new QThread();
-  QTimer* timer = new QTimer();
-  timer->start(1000);
-  timer->setSingleShot(true);
-  worker->moveToThread(thread);
-  timer->moveToThread(thread);
-  connect(timer, SIGNAL(timeout()), worker, SLOT(mainLoop()));
-  connect(worker, SIGNAL(requestLabelUpdate(QString)), this, SLOT(updateLabel(QString)));
-  connect(thread, SIGNAL(destroyed()), worker, SLOT(deleteLater()));
-
-  thread->start();
+    FIFOReader *worker = new FIFOReader();
+    QThread* thread = new QThread();
+    // TODO: figure out how to start this thread without using a QTimer
+    QTimer* timer = new QTimer();
+    timer->start(1000);
+    //timer->setSingleShot(true);
+    worker->moveToThread(thread);
+    timer->moveToThread(thread);
+    connect(timer, SIGNAL(timeout()), worker, SLOT(mainLoop()));
+    connect(worker, SIGNAL(requestLabelUpdate(QString)), this, SLOT(updateLabel(QString)));
+    connect(thread, SIGNAL(destroyed()), worker, SLOT(deleteLater()));
+    thread->start();
 }
 
 void Plasmobar::updateLabel(const QString& content)

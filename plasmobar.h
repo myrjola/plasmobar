@@ -20,7 +20,6 @@ public slots:
 	void updateLabel(const QString& content);
 
 private:
-    int m_pipe_fd;
     Plasma::Label* m_label;
 };
 
