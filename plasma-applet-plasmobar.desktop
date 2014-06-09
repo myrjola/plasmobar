@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=Plasmobar
+Comment=XMobar like Plasmoid
+Type=Service
+ServiceTypes=Plasma/Applet
+
+X-KDE-Library=plasma_applet_plasmobar
+X-KDE-PluginInfo-Name=plasmobar
+X-KDE-PluginInfo-Category=Windows and Tasks
+X-KDE-PluginInfo-Author=Martin Yrjölä
+X-KDE-PluginInfo-Email=martin@martinyrjola.net
+X-KDE-PluginInfo-Version=0.2
+X-KDE-PluginInfo-Website=https://github.com/myrjola/plasmobar
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=MIT
+X-KDE-PluginInfo-EnabledByDefault=true
