@@ -4,17 +4,31 @@
 
 #include <Plasma/DataContainer>
 
+#include <stdio.h>
+#include <iostream>
+#include <unistd.h>
+#include <cstdlib>
+#include <cstring>
+#include <fcntl.h>
+#include <climits>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/select.h>
+#include <sys/time.h>
+
+using namespace std;
+
 FIFOReaderEngine::FIFOReaderEngine(QObject* parent, const QVariantList& args)
     : Plasma::DataEngine(parent, args)
 {
     // We ignore any arguments - data engines do not have much use for them
     Q_UNUSED(args)
 
-    // This prevents applets from setting an unnecessarily high
-    // update interval and using too much CPU.
-    // In the case of a clock that only has second precision,
-    // a third of a second should be more than enough.
-    setMinimumPollingInterval(333);
+        // This prevents applets from setting an unnecessarily high
+        // update interval and using too much CPU.
+        // In the case of a clock that only has second precision,
+        // a third of a second should be more than enough.
+        setMinimumPollingInterval(333);
 }
 
 bool FIFOReaderEngine::sourceRequestEvent(const QString &name)
@@ -27,8 +41,36 @@ bool FIFOReaderEngine::sourceRequestEvent(const QString &name)
 
 bool FIFOReaderEngine::updateSourceEvent(const QString &name)
 {
-    QString xmonadLog = "<fc=#429942>[1-term]</fc> 2-emacs 3-www 4-dev 5-music 7 8 9-chat : Tall : <fc=orange>KF5 : zsh – Konsole</fc>";
-    setData(name, I18N_NOOP("XMonad"), xmonadLog);
+    int m_pipe_fd, ret;
+    fd_set fdset;
+    char buff[1000];
+    int len = 1000;
+
+    m_pipe_fd = open("/tmp/xmonadfifo", O_RDONLY | O_NONBLOCK);
+
+    if (m_pipe_fd != -1) {
+        FD_ZERO(&fdset);
+        FD_SET(m_pipe_fd,&fdset);
+        struct timeval tv;
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
+        ret = select(m_pipe_fd+1,&fdset,NULL,NULL,&tv);
+        if (ret > 0) {
+            read(m_pipe_fd, buff, len);
+        }
+        else if ( ret == 0 ) {
+            break;
+        }
+        else {
+            cout << "Error returned from select: " << ret << endl;
+            break;
+        }
+        ::close(m_pipe_fd);
+    } else {
+        exit(1);
+    }
+    setData(name, I18N_NOOP("XMonad"), QString(buff));
+
     return true;
 }
 

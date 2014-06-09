@@ -3,20 +3,25 @@
 
 #include <Plasma/Applet>
 
+#include <plasma/widgets/label.h>
+
 // Define our plasma Applet
 class Plasmobar : public Plasma::Applet
 {
     Q_OBJECT
-    public:
-        // Basic Create/Destroy
-        Plasmobar(QObject *parent, const QVariantList &args);
-        ~Plasmobar();
+public:
+    // Basic Create/Destroy
+    Plasmobar(QObject *parent, const QVariantList &args);
+    ~Plasmobar();
 
-        // The paintInterface procedure paints the applet to screen
-        void paintInterface(QPainter *p,
-                const QStyleOptionGraphicsItem *option,
-                const QRect& contentsRect);
 	void init();
+
+public slots:
+	void updateLabel(const QString& content);
+
+private:
+    int m_pipe_fd;
+    Plasma::Label* m_label;
 };
 
 #endif

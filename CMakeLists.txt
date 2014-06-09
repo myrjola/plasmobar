@@ -1,6 +1,8 @@
 # Project Needs a name ofcourse
 project(plasmobar)
 
+set(CMAKE_AUTOMOC ON)
+
 # Find the required Libaries
 find_package(KDE4 REQUIRED)
 include(KDE4Defaults)
