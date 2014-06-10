@@ -9,7 +9,7 @@ XMonad config:
 
 ```
 -- Command to launch the bar.
-myBar = "~/bin/writelastlinefrompipe.py /tmp/xmonadstate"
+myBar = "cat > /tmp/xmonadfifo"
 
 -- | Qt Rich text color formatter
 qtColor :: String  -- ^ foreground color: a color name, or #rrggbb format
@@ -35,22 +35,6 @@ main = do
 
 
 
-```
-
-writelastlinefrompipe.py
-
-```
-#!/bin/env python3
-
-import sys
-
-if len(sys.argv) < 2:
-    sys.exit('Usage: %s filename' % sys.argv[0])
-
-for line in sys.stdin:
-    with open(sys.argv[1], "w") as f:
-        print(line, file=f)
-```
 
 TODO
 ====
