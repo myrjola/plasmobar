@@ -59,7 +59,8 @@ public slots:
         QByteArray buffer;
         QString line;
         qDebug() << "FIFOReader::mainLoop opening file";
-        fp=fopen("/tmp/xmonadfifo", "r");
+        string filename("/tmp/xmonadfifo");
+        fp = fopen(filename.c_str(), "r");
         if (fp != NULL) {
             while((c=getc(fp)) != EOF)
             {
@@ -73,6 +74,8 @@ public slots:
             }
             fclose(fp);
         }
+        line = QString("Could not open file: ") % QString(filename.c_str());
+        emit requestLabelUpdate(line);
         qDebug() << "FIFOReader::mainLoop thread exiting...";
     }
 signals:
