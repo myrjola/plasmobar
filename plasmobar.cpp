@@ -66,8 +66,8 @@ public slots:
                     line = "";
                 }
             }
+            fclose(fp);
         }
-        fclose(fp);
         qDebug() << "FIFOReader::mainLoop thread exiting...";
     }
 signals:
