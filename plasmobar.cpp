@@ -8,6 +8,8 @@
 #include <QTimer>
 #include <QThread>
 #include <QDebug>
+#include <QByteArray>
+#include <QTextCodec>
 #include <QStringBuilder>
 
 
@@ -54,16 +56,19 @@ public slots:
         qDebug() << "FIFOReader::mainLoop starting";
         FILE *fp;
         int c;
-        QString line = "";
+        QByteArray buffer;
+        QString line;
         qDebug() << "FIFOReader::mainLoop opening file";
         fp=fopen("/tmp/xmonadfifo", "r");
         if (fp != NULL) {
             while((c=getc(fp)) != EOF)
             {
-                line = line % QChar((char) c);
-                if (((char) c) == '\n') {
+                char ch = (char) c;
+                buffer.append(ch);
+                if ((ch) == '\n') {
+                    line = QTextCodec::codecForMib(106)->toUnicode(buffer);
                     emit requestLabelUpdate(line);
-                    line = "";
+                    buffer.clear();
                 }
             }
             fclose(fp);

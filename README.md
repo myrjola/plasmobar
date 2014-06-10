@@ -55,6 +55,7 @@ for line in sys.stdin:
 TODO
 ====
 
-- [ ] Come up with a better IPC, dbus would be awesome
+- [X] Come up with a better IPC, dbus would be awesome, solved this with QThread and a C++ plasmoid
+- [X] Get rid of strange characters for Konsole window title â[][]
 - [ ] Mouse support
 - [ ] Port to Plasma Next
