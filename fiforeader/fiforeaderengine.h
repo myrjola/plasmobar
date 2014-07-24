@@ -23,6 +23,9 @@ class FIFOReaderEngine : public Plasma::DataEngine
         // is triggered for an existing source (ie: when a valid update
         // interval is set when requesting a source)
         bool updateSourceEvent(const QString& source);
+
+    protected Q_SLOTS:
+        void newLine(const QString &line);
 };
 
 #endif // FIFOREADERENGINE_H

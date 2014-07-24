@@ -1,6 +1,16 @@
 #include "fiforeaderengine.h"
 
 #include <QString>
+#include <QCoreApplication>
+#include <QPainter>
+#include <QFontMetrics>
+#include <QSizeF>
+#include <QTimer>
+#include <QThread>
+#include <QDebug>
+#include <QByteArray>
+#include <QTextCodec>
+#include <QStringBuilder>
 
 #include <Plasma/DataContainer>
 
@@ -18,17 +28,71 @@
 
 using namespace std;
 
+class FIFOReader : public QObject
+{
+    Q_OBJECT
+public slots:
+    void mainLoop()
+    {
+        qDebug() << "FIFOReader::mainLoop starting";
+        FILE *fp;
+        int c;
+        QByteArray buffer;
+        QString line;
+        qDebug() << "FIFOReader::mainLoop opening file";
+        string filename("/tmp/xmonadfifo");
+        fp = fopen(filename.c_str(), "r");
+        if (fp != NULL) {
+            while((c=getc(fp)) != EOF)
+            {
+                char ch = (char) c;
+                buffer.append(ch);
+                if ((ch) == '\n') {
+                    line = QTextCodec::codecForMib(106)->toUnicode(buffer);
+                    emit requestLabelUpdate(line);
+                    buffer.clear();
+                }
+            }
+            fclose(fp);
+        }
+        line = QString("Could not open file: ") % QString(filename.c_str());
+        emit requestLabelUpdate(line);
+        qDebug() << "FIFOReader::mainLoop thread exiting...";
+    }
+
+signals:
+    void requestLabelUpdate(const QString &);
+};
+
 FIFOReaderEngine::FIFOReaderEngine(QObject* parent, const QVariantList& args)
     : Plasma::DataEngine(parent, args)
 {
     // We ignore any arguments - data engines do not have much use for them
     Q_UNUSED(args)
 
-        // This prevents applets from setting an unnecessarily high
-        // update interval and using too much CPU.
-        // In the case of a clock that only has second precision,
-        // a third of a second should be more than enough.
-        setMinimumPollingInterval(333);
+    // This prevents applets from setting an unnecessarily high
+    // update interval and using too much CPU.
+    // In the case of a clock that only has second precision,
+    // a third of a second should be more than enough.
+    setMinimumPollingInterval(333);
+
+    FIFOReader *worker = new FIFOReader();
+    QThread* thread = new QThread();
+    // TODO: figure out how to start this thread without using a QTimer
+    QTimer* timer = new QTimer();
+    timer->start(1000);
+    //timer->setSingleShot(true);
+    worker->moveToThread(thread);
+    timer->moveToThread(thread);
+    connect(timer, SIGNAL(timeout()), worker, SLOT(mainLoop()));
+    connect(worker, SIGNAL(requestLabelUpdate(QString)), this, SLOT(newLine(QString)));
+    connect(thread, SIGNAL(destroyed()), worker, SLOT(deleteLater()));
+    thread->start();
+}
+
+void FIFOReaderEngine::newLine(const QString &line)
+{
+    return setData("XMonad", "XMonad", line);
 }
 
 bool FIFOReaderEngine::sourceRequestEvent(const QString &name)
@@ -41,45 +105,12 @@ bool FIFOReaderEngine::sourceRequestEvent(const QString &name)
 
 bool FIFOReaderEngine::updateSourceEvent(const QString &name)
 {
-    int m_pipe_fd, ret;
-    fd_set fdset;
-    char buff[1000];
-    int len = 1000;
-
-    m_pipe_fd = open("/tmp/xmonadfifo", O_RDONLY | O_NONBLOCK);
-
-    if (m_pipe_fd != -1) {
-        FD_ZERO(&fdset);
-        FD_SET(m_pipe_fd,&fdset);
-        struct timeval tv;
-        tv.tv_sec = 1;
-        tv.tv_usec = 0;
-        ret = select(m_pipe_fd+1,&fdset,NULL,NULL,&tv);
-        if (ret > 0) {
-            read(m_pipe_fd, buff, len);
-        }
-        else if ( ret == 0 ) {
-            break;
-        }
-        else {
-            cout << "Error returned from select: " << ret << endl;
-            break;
-        }
-        ::close(m_pipe_fd);
-    } else {
-        exit(1);
-    }
-    setData(name, I18N_NOOP("XMonad"), QString(buff));
-
+    setData(name, "XMonad", QString("XMonad"));
     return true;
 }
 
 // This does the magic that allows Plasma to load
-// this plugin.  The first argument must match
-// the X-Plasma-EngineName in the .desktop file.
-// The second argument is the name of the class in
-// your plugin that derives from Plasma::DataEngine
-K_EXPORT_PLASMA_DATAENGINE(fiforeader, FIFOReaderEngine)
+// this plugin.
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(fiforeader, FIFOReaderEngine, "plasma-dataengine-fiforeader.json")
 
-// this is needed since TestTimeEngine is a QObject
 #include "fiforeaderengine.moc"

@@ -1,29 +1,30 @@
-# Project Needs a name ofcourse
 project(plasmobar)
 
-set(CMAKE_AUTOMOC ON)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
-# Find the required Libaries
-find_package(KDE4 REQUIRED)
-include(KDE4Defaults)
+set(QT_MIN_VERSION "5.3.0")
+set(KF5_MIN_VERSION "5.0.0")
+set(INSTALL_SDDM_THEME TRUE)
+find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Widgets Quick Concurrent Test Script Network)
 
-add_definitions (${QT_DEFINITIONS} ${KDE4_DEFINITIONS})
-include_directories(
-   ${CMAKE_SOURCE_DIR}
-   ${CMAKE_BINARY_DIR}
-   ${KDE4_INCLUDES}
-   )
+find_package(ECM 0.0.11 REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
 
-# We add our source code here
-set(plasmobar_SRCS plasmobar.cpp)
+find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS Plasma Declarative TextWidgets)
 
-# Now make sure all files get to the right place
-kde4_add_plugin(plasma_applet_plasmobar ${plasmobar_SRCS})
-target_link_libraries(plasma_applet_plasmobar
-                      ${KDE4_PLASMA_LIBS} ${KDE4_KDEUI_LIBS})
+# WARNING PlasmaQuick provides unversioned CMake config
+find_package(KF5 REQUIRED COMPONENTS PlasmaQuick)
 
-install(TARGETS plasma_applet_plasmobar
-        DESTINATION ${PLUGIN_INSTALL_DIR})
+include(KDEInstallDirs)
+include(KDECMakeSettings)
+include(KDECompilerSettings)
+include(ECMPackageConfigHelpers)
+include(ECMMarkNonGuiExecutable)
+include(CMakePackageConfigHelpers)
+include(WriteBasicConfigVersionFile)
+include(CheckIncludeFiles)
+include(FeatureSummary)
 
-install(FILES plasma-applet-plasmobar.desktop
-        DESTINATION ${SERVICES_INSTALL_DIR})
+add_subdirectory(fiforeader)
+
+plasma_install_package(package net.martinyrjola.plasmobar)
