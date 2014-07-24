@@ -30,9 +30,7 @@ main = do
   xmonad =<< statusBar myBar myPP toggleStrutsKey conf {
    startupHook = startupHook conf >> setWMName "LG3D"
   }
-
-
-
+```
 
 TODO
 ====
