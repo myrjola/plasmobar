@@ -3,8 +3,6 @@ plasmobar
 
 Xmobar-like functionality for KDE panel.
 
-Reload with `plasmapkg -u plasmobar;kbuildsycoca4;kquitapp plasma-desktop; plasma-desktop &`
-
 XMonad config:
 
 ```
@@ -39,7 +37,7 @@ main = do
 TODO
 ====
 
-- [X] Come up with a better IPC, dbus would be awesome, solved this with QThread and a C++ plasmoid
+- [X] Come up with a better IPC, dbus would be awesome, solved this with QThread and a Plasma's DataEngine
 - [X] Get rid of strange characters for Konsole window title â[][]
 - [ ] Mouse support
-- [ ] Port to Plasma Next
+- [X] Port to Plasma 5
