@@ -32,7 +32,15 @@ Item {
         clip: true
         anchors.fill: parent
         textFormat: Text.StyledText
+
+        // All this is needed to make the text fit itself vertically.
         fontSizeMode: Text.VerticalFit
-        font.pointSize: 72
+        minimumPixelSize: 1
+        height: 0
+        width: 0
+        font {
+            pixelSize: 1024
+            pointSize: 0
+        }
     }
 }
